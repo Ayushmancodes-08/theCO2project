@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { QuizAnswers, LoggedActivity, Challenge } from './types';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { QuizAnswers, LoggedActivity, Challenge, TabId } from './types';
 import { calculateAnnualBaseline, generate30DayHistory } from './utils/carbonCalc';
 
 // Import components
@@ -10,14 +10,51 @@ import AiInsights from './components/AiInsights';
 import WeeklyChallenges from './components/WeeklyChallenges';
 import ProgressTrend from './components/ProgressTrend';
 
-import { Leaf, RefreshCcw, LayoutDashboard, FileText, Award, Brain, BarChart3, LogOut, Swords } from 'lucide-react';
+import {
+  Leaf, RefreshCcw, LayoutDashboard, FileText,
+  Award, Brain, BarChart3, LogOut,
+} from 'lucide-react';
 import { sfx } from './utils/audio';
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Safely parse JSON from localStorage, returning null on any failure. */
+function safeLocalStorageParse<T>(key: string): T | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as T;
+    return parsed;
+  } catch {
+    // Corrupted storage — clear the bad entry to prevent loops
+    try { localStorage.removeItem(key); } catch { /* ignore */ }
+    return null;
+  }
+}
+
+/** Persist a value to localStorage, ignoring quota errors gracefully. */
+function safeLocalStorageSet(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (err) {
+    console.warn(`[EcoQuest] Could not persist "${key}" to localStorage:`, err);
+  }
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const STORAGE_KEYS = {
+  answers:    'ecomark_answers',
+  logs:       'ecomark_logs',
+  challenges: 'ecomark_challenges',
+} as const;
 
 const INITIAL_CHALLENGES: Challenge[] = [
   {
     id: 'ch-active-commute',
     title: 'Walk instead of drive',
-    description: 'Leave the car in the garage for trips under 5 kilometers. Walk or bike instead, or substitute with collective public train/bus transit.',
+    description:
+      'Leave the car in the garage for trips under 5 km. Walk, bike, or take public transit instead.',
     category: 'transport',
     co2Savings: 4.2,
     duration: '2 Commutes',
@@ -27,7 +64,8 @@ const INITIAL_CHALLENGES: Challenge[] = [
   {
     id: 'ch-meatfree',
     title: 'Skip meat for 3 days',
-    description: 'Avoid all poultry, pork, beef, and seafood for 3 full days. Replace with plant-based ingredients to nurture your soil index.',
+    description:
+      'Avoid all animal protein for 3 full days. Explore plant-based meals and nurture your soil index.',
     category: 'food',
     co2Savings: 8.5,
     duration: '3 Days',
@@ -37,7 +75,8 @@ const INITIAL_CHALLENGES: Challenge[] = [
   {
     id: 'ch-cold-wash',
     title: 'Air dry laundry',
-    description: 'Avoid running high-energy utility dryer machines this week. Rely on natural wind currents to dry your linens.',
+    description:
+      'Skip the tumble dryer this week and rely on natural airflow to dry your clothes.',
     category: 'energy',
     co2Savings: 2.1,
     duration: '1 Week',
@@ -46,157 +85,191 @@ const INITIAL_CHALLENGES: Challenge[] = [
   },
 ];
 
+// ─── Navigation Config ────────────────────────────────────────────────────────
+
+const NAV_ITEMS: { id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'dashboard',  label: 'Scoreboard',     icon: LayoutDashboard },
+  { id: 'tracker',   label: 'Quest Logger',    icon: FileText },
+  { id: 'challenges',label: 'Guild Quests',    icon: Award },
+  { id: 'insights',  label: 'Sage Advice',     icon: Brain },
+  { id: 'trend',     label: 'Leyline Trends',  icon: BarChart3 },
+];
+
+const MOBILE_NAV_ITEMS = NAV_ITEMS.slice(0, 4);
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function App() {
   const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(null);
-  const [activities, setActivities] = useState<LoggedActivity[]>([]);
-  const [challenges, setChallenges] = useState<Challenge[]>(INITIAL_CHALLENGES);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'tracker' | 'challenges' | 'insights' | 'trend'>('dashboard');
-  const [loading, setLoading] = useState(true);
+  const [activities,  setActivities]  = useState<LoggedActivity[]>([]);
+  const [challenges,  setChallenges]  = useState<Challenge[]>(INITIAL_CHALLENGES);
+  const [activeTab,   setActiveTab]   = useState<TabId>('dashboard');
+  const [loading,     setLoading]     = useState(true);
 
-  // Sync state with LocalStorage on mount
+  // ── Load persisted state on mount ──────────────────────────────────────────
   useEffect(() => {
-    try {
-      const storedAnswers = localStorage.getItem('ecomark_answers');
-      const storedLogs = localStorage.getItem('ecomark_logs');
-      const storedChallenges = localStorage.getItem('ecomark_challenges');
+    const storedAnswers    = safeLocalStorageParse<QuizAnswers>(STORAGE_KEYS.answers);
+    const storedLogs       = safeLocalStorageParse<LoggedActivity[]>(STORAGE_KEYS.logs);
+    const storedChallenges = safeLocalStorageParse<Challenge[]>(STORAGE_KEYS.challenges);
 
-      if (storedAnswers) {
-        setQuizAnswers(JSON.parse(storedAnswers));
-      }
+    if (storedAnswers)    setQuizAnswers(storedAnswers);
+    if (storedLogs)       setActivities(storedLogs);
+    if (storedChallenges) setChallenges(storedChallenges);
 
-      if (storedLogs) {
-        setActivities(JSON.parse(storedLogs));
-      }
-
-      if (storedChallenges) {
-        setChallenges(JSON.parse(storedChallenges));
-      }
-    } catch (e) {
-      console.error('LocalStorage load fault', e);
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
   }, []);
 
-  // Handle quiz completed baseline initialization
-  const handleQuizComplete = (answers: QuizAnswers) => {
-    setQuizAnswers(answers);
-    localStorage.setItem('ecomark_answers', JSON.stringify(answers));
+  // ── Handlers (stable references via useCallback) ──────────────────────────
 
-    // Generate typical 30-day starter history matching the quiz profile
+  const handleQuizComplete = useCallback((answers: QuizAnswers) => {
     const starterHistory = generate30DayHistory(answers);
+
+    setQuizAnswers(answers);
     setActivities(starterHistory);
-    localStorage.setItem('ecomark_logs', JSON.stringify(starterHistory));
-
-    // Initialize challenges list
     setChallenges(INITIAL_CHALLENGES);
-    localStorage.setItem('ecomark_challenges', JSON.stringify(INITIAL_CHALLENGES));
-    setActiveTab('dashboard'); // Direct transition to overview
-  };
 
-  // Add individual logged activity
-  const handleAddActivity = (newAct: Omit<LoggedActivity, 'id'>) => {
+    safeLocalStorageSet(STORAGE_KEYS.answers,    answers);
+    safeLocalStorageSet(STORAGE_KEYS.logs,       starterHistory);
+    safeLocalStorageSet(STORAGE_KEYS.challenges, INITIAL_CHALLENGES);
+
+    setActiveTab('dashboard');
+  }, []);
+
+  const handleAddActivity = useCallback((newAct: Omit<LoggedActivity, 'id'>) => {
     const actWithId: LoggedActivity = {
       ...newAct,
-      id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      id: `act-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     };
 
-    const updated = [...activities, actWithId];
-    setActivities(updated);
-    localStorage.setItem('ecomark_logs', JSON.stringify(updated));
-  };
+    setActivities((prev) => {
+      const updated = [...prev, actWithId];
+      safeLocalStorageSet(STORAGE_KEYS.logs, updated);
+      return updated;
+    });
+  }, []);
 
-  // Delete activity log
-  const handleDeleteActivity = (id: string) => {
-    const updated = activities.filter((act) => act.id !== id);
-    setActivities(updated);
-    localStorage.setItem('ecomark_logs', JSON.stringify(updated));
-  };
+  const handleDeleteActivity = useCallback((id: string) => {
+    setActivities((prev) => {
+      const updated = prev.filter((act) => act.id !== id);
+      safeLocalStorageSet(STORAGE_KEYS.logs, updated);
+      return updated;
+    });
+  }, []);
 
-  // Commit / Accept weekly challenge
-  const handleAcceptChallenge = (id: string) => {
-    const updated = challenges.map((ch) =>
-      ch.id === id ? { ...ch, isAccepted: true } : ch
-    );
-    setChallenges(updated);
-    localStorage.setItem('ecomark_challenges', JSON.stringify(updated));
-  };
+  const handleAcceptChallenge = useCallback((id: string) => {
+    setChallenges((prev) => {
+      const updated = prev.map((ch) =>
+        ch.id === id ? { ...ch, isAccepted: true } : ch
+      );
+      safeLocalStorageSet(STORAGE_KEYS.challenges, updated);
+      return updated;
+    });
+  }, []);
 
-  // Complete challenge & earn savings CO2 reward
-  const handleCompleteChallenge = (id: string) => {
+  const handleCompleteChallenge = useCallback((id: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
-    const challengeObject = challenges.find((ch) => ch.id === id);
 
-    if (!challengeObject) return;
+    setChallenges((prev) => {
+      const challenge = prev.find((ch) => ch.id === id);
+      if (!challenge) return prev;
 
-    // Log a negative carbon activity representing offsetting savings
-    const updatedLogs = [
-      ...activities,
-      {
-        id: `reward-ch-${id}-${Date.now()}`,
-        date: todayStr,
-        category: challengeObject.category,
-        description: `Completed Quest: ${challengeObject.title}`,
-        amount: 1,
-        co2Impact: -challengeObject.co2Savings,
-      },
-    ];
+      // Log a negative-impact (offset) activity for the completed challenge
+      setActivities((prevActs) => {
+        const updatedActs = [
+          ...prevActs,
+          {
+            id:          `reward-ch-${id}-${Date.now()}`,
+            date:        todayStr,
+            category:    challenge.category,
+            description: `Completed Quest: ${challenge.title}`,
+            amount:      1,
+            co2Impact:   -challenge.co2Savings,
+          } satisfies LoggedActivity,
+        ];
+        safeLocalStorageSet(STORAGE_KEYS.logs, updatedActs);
+        return updatedActs;
+      });
 
-    setActivities(updatedLogs);
-    localStorage.setItem('ecomark_logs', JSON.stringify(updatedLogs));
+      const updated = prev.map((ch) =>
+        ch.id === id ? { ...ch, isCompleted: true, completedAt: todayStr } : ch
+      );
+      safeLocalStorageSet(STORAGE_KEYS.challenges, updated);
+      return updated;
+    });
+  }, []);
 
-    const updatedChallenges = challenges.map((ch) =>
-      ch.id === id ? { ...ch, isCompleted: true, completedAt: todayStr } : ch
-    );
-    setChallenges(updatedChallenges);
-    localStorage.setItem('ecomark_challenges', JSON.stringify(updatedChallenges));
-  };
-
-  // Reset profile back to onboarding
-  const handleResetProfile = () => {
+  const handleResetProfile = useCallback(() => {
     sfx.playDeleteSfx();
-    if (window.confirm('Construct an eclipse ritual? Dynamic statistics and logged spells will be lost.')) {
+    if (window.confirm('Reset your EcoQuest profile? All logged activities and progress will be lost.')) {
       setQuizAnswers(null);
       setActivities([]);
       setChallenges(INITIAL_CHALLENGES);
-      localStorage.removeItem('ecomark_answers');
-      localStorage.removeItem('ecomark_logs');
-      localStorage.removeItem('ecomark_challenges');
+      try {
+        localStorage.removeItem(STORAGE_KEYS.answers);
+        localStorage.removeItem(STORAGE_KEYS.logs);
+        localStorage.removeItem(STORAGE_KEYS.challenges);
+      } catch { /* ignore */ }
       setActiveTab('dashboard');
     }
-  };
+  }, []);
 
-  // Compute stats
-  const totalWeeklySaved = challenges
-    .filter((ch) => ch.isCompleted)
-    .reduce((sum, ch) => sum + ch.co2Savings, 0);
+  const handleNavigateToTab = useCallback((tab: TabId) => {
+    sfx.playLogSfx();
+    setActiveTab(tab);
+  }, []);
 
-  const baselineAnnualTonnes = quizAnswers ? calculateAnnualBaseline(quizAnswers) : 0;
+  // ── Derived stats (memoised) ──────────────────────────────────────────────
+
+  const totalWeeklySaved = useMemo(() =>
+    challenges
+      .filter((ch) => ch.isCompleted)
+      .reduce((sum, ch) => sum + ch.co2Savings, 0),
+    [challenges]
+  );
+
+  const baselineAnnualTonnes = useMemo(() =>
+    quizAnswers ? calculateAnnualBaseline(quizAnswers) : 0,
+    [quizAnswers]
+  );
+
+  // ── Loading screen ─────────────────────────────────────────────────────────
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <Leaf className="w-8 h-8 text-emerald-500 animate-spin" />
+      <div
+        className="min-h-screen flex flex-col items-center justify-center p-4"
+        role="status"
+        aria-label="Loading EcoQuest RPG"
+        aria-live="polite"
+      >
+        <Leaf className="w-8 h-8 text-emerald-500 animate-spin" aria-hidden="true" />
         <span className="text-xs font-display font-semibold text-slate-500 mt-4 tracking-widest uppercase">
-          Synthesizing EcoQuest Realm...
+          Synthesizing EcoQuest Realm…
         </span>
       </div>
     );
   }
 
-  // Render onboarding flow state
+  // ── Onboarding ─────────────────────────────────────────────────────────────
+
   if (!quizAnswers) {
     return (
       <div className="min-h-screen flex flex-col justify-between py-6 px-4">
-        {/* Intro Logo Header */}
         <div className="text-center space-y-2.5 max-w-sm mx-auto my-6 select-none">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500 text-white border border-emerald-400 rounded-full text-xs font-bold shadow-sm">
-            <Leaf className="w-3.5 h-3.5 fill-current animate-bounce" />
+          <div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500 text-white border border-emerald-400 rounded-full text-xs font-bold shadow-sm"
+            role="presentation"
+          >
+            <Leaf className="w-3.5 h-3.5 fill-current animate-bounce" aria-hidden="true" />
             <span className="font-display text-[9px] uppercase font-black tracking-widest">REALTIME CARBON PORTAL</span>
           </div>
-          <h1 className="text-4xl font-display font-black text-slate-900 tracking-tight leading-none uppercase">ECOQUEST RPG</h1>
+
+          <h1 className="text-4xl font-display font-black text-slate-900 tracking-tight leading-none uppercase">
+            ECOQUEST RPG
+          </h1>
+
           <p className="text-xs text-slate-600 font-sans font-semibold leading-relaxed">
-            Measure your ecological signature baseline, level up cozy forest avatars, and vanquish carbon elements!
+            Measure your ecological baseline, level up your solarpunk guardian, and vanquish the Smog Lord!
           </p>
         </div>
 
@@ -207,108 +280,119 @@ export default function App() {
     );
   }
 
+  // ── Main app ───────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen text-[#0f172a] antialiased flex flex-col relative overflow-x-hidden">
-      
-      {/* Mobile Header - Glassmorphic */}
-      <header className="lg:hidden fixed top-0 w-full z-40 bg-white/70 backdrop-blur-md border-b border-white/30 h-16 flex justify-between items-center px-4 select-none">
-        <span className="font-display text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 pt-1">
-          <span className="animate-float">🌱</span> ECOQUEST
+
+      {/* Mobile header */}
+      <header
+        className="lg:hidden fixed top-0 w-full z-40 bg-white/70 backdrop-blur-md border-b border-white/30 h-16 flex justify-between items-center px-4 select-none"
+        role="banner"
+      >
+        <span
+          className="font-display text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 pt-1"
+          aria-label="EcoQuest RPG"
+        >
+          <span aria-hidden="true" className="animate-float">🌱</span> ECOQUEST
         </span>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={handleResetProfile}
             id="mobile-reset-profile"
             className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50/50 border border-white/40 rounded-xl cursor-pointer"
-            title="Eclipse profile assessment"
+            aria-label="Reset profile — clears all data"
+            title="Reset your EcoQuest profile"
           >
-            <RefreshCcw className="w-4 h-4" />
+            <RefreshCcw className="w-4 h-4" aria-hidden="true" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-emerald-500 border border-emerald-400 flex items-center justify-center text-white text-xs select-none font-black font-mono shadow-sm">
+          <div
+            className="w-8 h-8 rounded-full bg-emerald-500 border border-emerald-400 flex items-center justify-center text-white text-xs select-none font-black font-mono shadow-sm"
+            aria-hidden="true"
+          >
             S
           </div>
         </div>
       </header>
 
-      {/* Main Structural Layout */}
+      {/* Layout: sidebar + main content */}
       <div className="flex flex-1 max-w-7xl w-full mx-auto pt-16 lg:pt-0 pb-20 lg:pb-0 h-full">
-        
-        {/* Left Side Navigation Pane (Desktop Only) - Glassmorphic sidebar */}
-        <aside className="w-64 hidden lg:flex flex-col sticky top-0 left-0 border-r border-white/30 p-6 h-screen select-none justify-between bg-white/45 backdrop-blur-md z-20">
+
+        {/* Desktop sidebar */}
+        <aside
+          className="w-64 hidden lg:flex flex-col sticky top-0 left-0 border-r border-white/30 p-6 h-screen select-none justify-between bg-white/45 backdrop-blur-md z-20"
+          aria-label="Site navigation"
+        >
           <div className="space-y-8">
             <div className="pt-2">
               <h1 className="font-display text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2 uppercase">
-                <span className="animate-float">🌱</span> EcoQuest
+                <span className="animate-float" aria-hidden="true">🌱</span> EcoQuest
               </h1>
               <p className="text-emerald-700 font-display text-[9px] font-black uppercase tracking-widest mt-1 bg-emerald-50/70 border border-emerald-200/50 py-1 px-2.5 rounded-full w-fit">
                 Solar Sanctuary
               </p>
             </div>
 
-            {/* Nav Menu */}
-            <nav className="flex flex-col gap-2">
-              {[
-                { id: 'dashboard', label: 'Scoreboard', icon: LayoutDashboard },
-                { id: 'tracker', label: 'Quest Logger', icon: FileText },
-                { id: 'challenges', label: 'Guild Quests', icon: Award },
-                { id: 'insights', label: 'Sage Advice', icon: Brain },
-                { id: 'trend', label: 'Leyline Trends', icon: BarChart3 },
-              ].map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      sfx.playLogSfx();
-                      setActiveTab(item.id as any);
-                    }}
-                    id={`sidebar-link-${item.id}`}
-                    className={`flex items-center gap-3 px-4 py-3 text-xs font-display font-black uppercase tracking-wider transition-all rounded-xl border cursor-pointer text-left ${
-                      isActive
-                        ? 'bg-slate-900 border-slate-950 text-white font-black shadow-md'
-                        : 'text-slate-600 border-transparent hover:bg-white/50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
+            <nav aria-label="Main navigation">
+              <ul className="flex flex-col gap-2 list-none p-0 m-0">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => handleNavigateToTab(item.id)}
+                        id={`sidebar-link-${item.id}`}
+                        aria-current={isActive ? 'page' : undefined}
+                        className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-display font-black uppercase tracking-wider transition-all rounded-xl border cursor-pointer text-left ${
+                          isActive
+                            ? 'bg-slate-900 border-slate-950 text-white shadow-md'
+                            : 'text-slate-600 border-transparent hover:bg-white/50 hover:text-slate-900'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>{item.label}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
             </nav>
           </div>
 
           <div className="space-y-4 pt-4 border-t border-white/20">
             <button
-              onClick={() => {
-                sfx.playLogSfx();
-                setActiveTab('tracker');
-              }}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-400 font-display text-[10px] font-black py-3.5 uppercase tracking-wider rounded-xl shadow-md cursor-pointer text-center"
+              onClick={() => handleNavigateToTab('tracker')}
+              id="sidebar-log-quest"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-400 font-display text-[10px] font-black py-3.5 uppercase tracking-wider rounded-xl shadow-md cursor-pointer text-center transition-colors"
+              aria-label="Navigate to Quest Logger to log a new activity"
             >
               Log Quest Deed ⚔️
             </button>
 
             <button
               onClick={handleResetProfile}
+              id="sidebar-reset-profile"
               className="w-full border border-white/30 hover:bg-red-50/50 text-slate-500 hover:text-red-600 font-display text-[9px] font-black py-2.5 uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              aria-label="Reset EcoQuest profile — all data will be cleared"
             >
-              <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <LogOut className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>Eclipse Reset</span>
             </button>
           </div>
         </aside>
 
-        {/* Display Stage Container */}
-        <main className="flex-grow px-4 md:px-8 pt-6 lg:pt-8 pb-10 max-w-full overflow-hidden">
+        {/* Main content */}
+        <main
+          id="main-content"
+          className="flex-grow px-4 md:px-8 pt-6 lg:pt-8 pb-10 max-w-full overflow-hidden"
+          tabIndex={-1}
+        >
           {activeTab === 'dashboard' && (
             <DashboardOverview
               activities={activities}
               baselineAnnual={baselineAnnualTonnes}
-              onNavigateToTab={(tab) => {
-                sfx.playLogSfx();
-                setActiveTab(tab);
-              }}
+              onNavigateToTab={handleNavigateToTab}
             />
           )}
 
@@ -341,34 +425,30 @@ export default function App() {
             />
           )}
         </main>
-
       </div>
 
-      {/* Mobile bottom persistent tab bar - Glassmorphic */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 bg-white/70 backdrop-blur-md border-t border-white/30 px-2 select-none shadow-lg">
-        {[
-          { id: 'dashboard', label: 'Scoreboard', icon: LayoutDashboard },
-          { id: 'tracker', label: 'Log', icon: FileText },
-          { id: 'challenges', label: 'Quests', icon: Award },
-          { id: 'insights', label: 'Sage Advice', icon: Brain },
-        ].map((item) => {
+      {/* Mobile bottom nav */}
+      <nav
+        className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 bg-white/70 backdrop-blur-md border-t border-white/30 px-2 select-none shadow-lg"
+        aria-label="Mobile navigation"
+      >
+        {MOBILE_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
-              onClick={() => {
-                sfx.playLogSfx();
-                setActiveTab(item.id as any);
-              }}
+              onClick={() => handleNavigateToTab(item.id)}
               id={`mobile-nav-link-${item.id}`}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={item.label}
               className={`flex flex-col items-center justify-center w-20 h-full cursor-pointer select-none transition-transform active:scale-95 ${
                 isActive
-                  ? 'text-emerald-600 border-t-4 border-emerald-500 pt-0 font-black'
+                  ? 'text-emerald-600 border-t-4 border-emerald-500 font-black'
                   : 'text-slate-500 hover:text-emerald-500 pt-1 font-semibold'
               }`}
             >
-              <Icon className="w-5 h-5 shrink-0" />
+              <Icon className="w-5 h-5 shrink-0" aria-hidden="true" />
               <span className="font-display text-[9px] uppercase tracking-wider mt-1.5">
                 {item.label}
               </span>
@@ -376,7 +456,6 @@ export default function App() {
           );
         })}
       </nav>
-
     </div>
   );
 }

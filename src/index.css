@@ -1,27 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
+/* ─── Design Tokens ─────────────────────────────────────────────────────── */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans:    "Inter",         ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit",        sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-primary: #10b981; /* Emerald Green */
-  --color-primary-container: #064e3b; /* Dark Spruce Forest */
-  --color-on-primary: #ffffff;
-  
-  --color-brand-accent: #fbbf24; /* Sunset Gold RPG Level Accent */
-  --color-brand-danger: #ef4444; /* High Impact Alert Red */
-  --color-brand-bg: #e0f2fe; /* Light sky blue background for premium glass look */
-  --color-brand-border: rgba(255, 255, 255, 0.4); /* Transparent glass borders */
-  --color-on-surface: #0f172a; /* Midnight Blue Ink */
+  --color-primary:           #10b981;
+  --color-primary-container: #064e3b;
+  --color-on-primary:        #ffffff;
+  --color-brand-accent:      #fbbf24;
+  --color-brand-danger:      #ef4444;
+  --color-brand-bg:          #e0f2fe;
+  --color-brand-border:      rgba(255,255,255,0.4);
+  --color-on-surface:        #0f172a;
+
+  /* Minimum 4.5 : 1 WCAG AA contrast safe shades */
+  --color-text-primary:   #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted:     #64748b;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Smooth scroll only when the user hasn't asked for reduced motion */
+  scroll-behavior: auto;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: radial-gradient(circle at top right, #f0fdf4 0%, #e0f2fe 100%);
-  color: #0f172a;
-  min-height: 100vh;
+  font-family:      var(--font-sans);
+  background:       radial-gradient(circle at top right, #f0fdf4 0%, #e0f2fe 100%);
+  color:            var(--color-text-primary);
+  min-height:       100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -32,122 +48,158 @@ h1, h2, h3, h4, .font-display {
   font-family: var(--font-mono);
 }
 
-/* Glassmorphism Styles */
+/* ─── Skip Navigation (Accessibility) ──────────────────────────────────── */
+.skip-link {
+  position:        absolute;
+  top:             -100%;
+  left:            0.5rem;
+  z-index:         9999;
+  padding:         0.5rem 1rem;
+  background:      #0f172a;
+  color:           #ffffff;
+  font-weight:     700;
+  font-size:       0.875rem;
+  border-radius:   0 0 0.5rem 0.5rem;
+  text-decoration: none;
+  transition:      top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ─── Focus Visible — keyboard focus ring (WCAG 2.4.7) ─────────────────── */
+:focus-visible {
+  outline:        3px solid #10b981;
+  outline-offset: 3px;
+  border-radius:  4px;
+}
+
+/* Remove outline for pointer users only when focus-visible is unsupported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ─── Glassmorphism ─────────────────────────────────────────────────────── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(14px);
+  background:        rgba(255,255,255,0.65);
+  backdrop-filter:   blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+  border:            1px solid rgba(255,255,255,0.45);
+  box-shadow:        0 8px 32px 0 rgba(15,23,42,0.08);
 }
 
 .glass-panel-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
+  background:        rgba(15,23,42,0.85);
+  backdrop-filter:   blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border:            1px solid rgba(255,255,255,0.1);
+  box-shadow:        0 8px 32px 0 rgba(0,0,0,0.3);
 }
 
-/* Neumorphism Styles */
+/* ─── Neumorphism ───────────────────────────────────────────────────────── */
 .neumorph-flat {
-  background: #ffffff;
-  box-shadow: 6px 6px 12px #cbd5e1, -6px -6px 12px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background:  #ffffff;
+  box-shadow:  6px 6px 12px #cbd5e1, -6px -6px 12px #ffffff;
+  border:      1px solid rgba(255,255,255,0.8);
 }
 
 .neumorph-button {
-  background: #f8fafc;
-  box-shadow: 4px 4px 8px #cbd5e1, -4px -4px 8px #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background:  #f8fafc;
+  box-shadow:  4px 4px 8px #cbd5e1, -4px -4px 8px #ffffff;
+  border:      1px solid rgba(255,255,255,0.9);
+  transition:  box-shadow 0.2s cubic-bezier(0.4,0,0.2,1),
+               transform  0.2s cubic-bezier(0.4,0,0.2,1);
 }
 
 .neumorph-button:hover:not(:disabled) {
   box-shadow: 2px 2px 4px #cbd5e1, -2px -2px 4px #ffffff;
-  transform: translateY(1px);
+  transform:  translateY(1px);
 }
 
 .neumorph-button:active:not(:disabled) {
   box-shadow: inset 3px 3px 6px #cbd5e1, inset -3px -3px 6px #ffffff;
-  transform: translateY(2px);
+  transform:  translateY(2px);
 }
 
 .neumorph-inset {
-  box-shadow: inset 4px 4px 8px #cbd5e1, inset -4px -4px 8px #ffffff;
-  background: #f8fafc;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:  inset 4px 4px 8px #cbd5e1, inset -4px -4px 8px #ffffff;
+  background:  #f8fafc;
+  border:      1px solid rgba(255,255,255,0.5);
 }
 
-/* Specific component presets matching neumorphic design principles */
+/* ─── Range input thumb ─────────────────────────────────────────────────── */
 input[type="range"]::-webkit-slider-thumb {
   background-color: #10b981;
-  border: 2px solid #ffffff;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.15), -2px -2px 5px rgba(255,255,255,0.8);
-  border-radius: 9999px;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
+  border:           2px solid #ffffff;
+  box-shadow:       2px 2px 5px rgba(0,0,0,0.15), -2px -2px 5px rgba(255,255,255,0.8);
+  border-radius:    9999px;
+  width:            20px;
+  height:           20px;
+  cursor:           pointer;
+  appearance:       none;
 }
 
-/* Custom animations representing cute anime pets & interactive battles */
+/* ─── Animations ────────────────────────────────────────────────────────── */
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(3deg);
-  }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
+  0%,100% { transform: translateY(0)    rotate(0deg); }
+  50%     { transform: translateY(-10px) rotate(3deg); }
 }
 
 @keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @keyframes pulse-soft {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(0.96);
-  }
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 3s ease-in-out infinite;
+  0%,100% { opacity: 1;    transform: scale(1); }
+  50%     { opacity: 0.9;  transform: scale(0.96); }
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px) rotate(-2deg); }
-  75% { transform: translateX(4px) rotate(2deg); }
+  0%,100% { transform: translateX(0); }
+  25%     { transform: translateX(-4px) rotate(-2deg); }
+  75%     { transform: translateX(4px)  rotate(2deg); }
 }
 
-.animate-shake {
-  animation: shake 0.3s ease-in-out;
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slash {
-  0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1.5); }
-  50% { transform: scale(1.3) rotate(15deg); filter: brightness(2); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+.animate-float       { animation: float       4s ease-in-out infinite; }
+.animate-spin-slow   { animation: spin-slow  20s linear     infinite; }
+.animate-pulse-soft  { animation: pulse-soft  3s ease-in-out infinite; }
+.animate-shake       { animation: shake       0.3s ease-in-out; }
+.animate-fade-in     { animation: fade-in     0.35s ease-out both; }
+
+/* ─── Honour prefers-reduced-motion (WCAG 2.3.3) ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+    scroll-behavior:           auto   !important;
+  }
 }
 
-.animate-slash {
-  animation: slash 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* ─── High-contrast text utilities (WCAG 1.4.3) ────────────────────────── */
+.text-accessible-muted {
+  /* Minimum 4.5:1 on white — #64748b passes */
+  color: #475569;
+}
+
+/* ─── Visually hidden (for screen readers only) ─────────────────────────── */
+.sr-only {
+  position:   absolute;
+  width:      1px;
+  height:     1px;
+  padding:    0;
+  margin:     -1px;
+  overflow:   hidden;
+  clip:       rect(0,0,0,0);
+  white-space: nowrap;
+  border-width: 0;
 }

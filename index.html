@@ -3,11 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EcoMark — Carbon Quiz & Dashboard</title>
+    <meta name="description" content="EcoQuest RPG — Track your carbon footprint, earn XP, complete eco challenges and level up your solarpunk guardian." />
+    <meta name="theme-color" content="#10b981" />
+    <!-- CSP: tighten resource loading, allow Google Fonts -->
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self';" />
+    <title>EcoQuest RPG — Carbon Footprint Tracker &amp; Dashboard</title>
+    <!-- Preconnect for faster font loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Skip-to-content for keyboard / screen-reader users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div id="root" role="application" aria-label="EcoQuest RPG Carbon Tracker"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

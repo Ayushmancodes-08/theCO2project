@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-primary: #10b981; /* Emerald Green */
+  --color-primary-container: #064e3b; /* Dark Spruce Forest */
+  --color-on-primary: #ffffff;
+  
+  --color-brand-accent: #fbbf24; /* Sunset Gold RPG Level Accent */
+  --color-brand-danger: #ef4444; /* High Impact Alert Red */
+  --color-brand-bg: #fefcf6; /* Butter Warm Parchment */
+  --color-brand-border: #1e293b; /* Tough Dark Line Art Border */
+  --color-on-surface: #0f172a; /* Midnight Blue Ink */
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #fefcf6;
+  color: #0f172a;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom progress bar styles to match scientific low rounded shapes */
+input[type="range"]::-webkit-slider-thumb {
+  background-color: #10b981;
+  border: 2px solid #1e293b;
+  border-radius: 9999px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Gaming Retro RPG Neo-Brutalist Border shadows */
+.game-card {
+  background-color: #ffffff;
+  border: 2px solid #1e293b;
+  box-shadow: 4px 4px 0px 0px #1e293b;
+  transition: all 0.2s ease-in-out;
+}
+
+.game-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px #1e293b;
+}
+
+.game-btn {
+  background-color: #10b981;
+  color: #ffffff;
+  border: 2px solid #1e293b;
+  box-shadow: 2px 2px 0px 0px #1e293b;
+  transition: all 0.15s ease-in-out;
+}
+
+.game-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px 0px #1e293b;
+  filter: brightness(1.05);
+}
+
+.game-btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px #1e293b;
+}
+
+/* Custom floating animation representing cute anime pets */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+

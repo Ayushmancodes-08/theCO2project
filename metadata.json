@@ -1,0 +1,6 @@
+{
+  "name": "EcoMark",
+  "description": "EcoMark is a carbon footprint awareness platform with a 5-question onboarding quiz, daily activity tracker, personalized AI-powered insights, weekly micro-challenges, and 30-day progress trend visualization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

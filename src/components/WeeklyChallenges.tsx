@@ -165,7 +165,6 @@ export default function WeeklyChallenges({
             <li
               key={ch.id}
               id={`challenge-card-${ch.id}`}
-              aria-label={`Challenge: ${detail.title}. Status: ${statusLabel}. ${detail.savings}.`}
             >
               <article
                 className={`flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden glass-panel shadow-md h-full ${

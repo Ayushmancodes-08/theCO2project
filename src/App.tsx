@@ -335,7 +335,7 @@ export default function App() {
           </h1>
 
           <p className="text-xs text-slate-600 font-sans font-semibold leading-relaxed">
-            Measure your ecological baseline, level up your solarpunk guardian, and vanquish the Smog Lord!
+            Understand, track, and reduce your carbon footprint through simple everyday actions and personalized insights! Level up your solarpunk companion and defeat the Smog Lord.
           </p>
         </div>
 

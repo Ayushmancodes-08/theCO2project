@@ -270,7 +270,6 @@ export default function ActivityTracker({
                   className={`flex items-center justify-between p-4 glass-panel rounded-2xl shadow-xs transition-transform duration-100 hover:translate-x-0.5 ${
                     isOffset ? 'bg-gradient-to-r from-emerald-50/50 to-white/60 border-emerald-200' : ''
                   }`}
-                  aria-label={`${act.description} — ${co2Label} on ${act.date}`}
                 >
                   <div className="flex items-center gap-3">
                     <div

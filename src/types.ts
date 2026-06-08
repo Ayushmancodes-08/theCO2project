@@ -7,6 +7,8 @@ export type TransportMode = 'car_ice' | 'car_ev' | 'transit' | 'bike_walk';
 export type DietType = 'meat_heavy' | 'meat_light' | 'vegetarian' | 'vegan';
 export type HomeEnergy = 'coal_gas' | 'mix' | 'renewable';
 export type PurchaseHabit = 'high' | 'moderate' | 'low';
+/** Strict literal union for annual flight frequency */
+export type FlightFrequency = 'low' | 'moderate' | 'high';
 export type ActivityCategory = 'transport' | 'food' | 'energy' | 'purchases';
 export type TabId = 'dashboard' | 'tracker' | 'challenges' | 'insights' | 'trend';
 
@@ -19,6 +21,8 @@ export interface QuizAnswers {
   dietType: DietType;
   /** Home electricity / heating grid source */
   homeEnergy: HomeEnergy;
+  /** Annual flight frequency */
+  flightFrequency: FlightFrequency;
   /** Discretionary consumer purchasing frequency */
   purchaseHabit: PurchaseHabit;
 }

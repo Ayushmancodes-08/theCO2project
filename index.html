@@ -5,16 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="EcoQuest RPG — Track your carbon footprint, earn XP, complete eco challenges and level up your solarpunk guardian." />
     <meta name="theme-color" content="#10b981" />
-    <!-- CSP: tighten resource loading, allow Google Fonts -->
-    <meta http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self';" />
+
+    <!--
+      Content-Security-Policy
+      • connect-src 'self' permits the /api/ fetch calls to the Express back-end.
+      • script-src 'self' prevents XSS injection of external scripts.
+      • style-src 'self' 'unsafe-inline' is required for Tailwind's runtime styles
+        and Google Fonts CSS.
+      • img-src 'self' data: blob: covers inlined SVGs and static assets.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src  'self';
+        style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src    https://fonts.gstatic.com;
+        img-src     'self' data: blob:;
+        connect-src 'self';
+      "
+    />
+
     <title>EcoQuest RPG — Carbon Footprint Tracker &amp; Dashboard</title>
-    <!-- Preconnect for faster font loading -->
+
+    <!-- Preconnect for faster Google Fonts loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
-    <!-- Skip-to-content for keyboard / screen-reader users -->
+    <!-- Skip-to-content link for keyboard / screen-reader users (WCAG 2.4.1) -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

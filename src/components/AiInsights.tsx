@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { QuizAnswers, LoggedActivity } from '../types';
+import type { QuizAnswers, LoggedActivity } from '../types';
 import { Send, Sparkles, RefreshCw } from 'lucide-react';
 import { sfx } from '../utils/audio';
 
@@ -18,6 +18,7 @@ interface Message {
   sender:         MessageSender;
   text:           string;
   time:           string;
+  date:           string;
   categoryRatio?: CategoryRatio;
 }
 
@@ -32,41 +33,12 @@ function getCurrentTime(): string {
   return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
 
-function generateMessageId(): string {
-  return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+function getCurrentDate(): string {
+  return new Date().toISOString().split('T')[0];
 }
 
-/** Generate an AI response based on user message keywords. */
-function generateResponse(
-  text: string,
-  foodRatio: number,
-): Pick<Message, 'text' | 'categoryRatio'> {
-  const q = text.toLowerCase();
-
-  if (/impact|biggest/.test(q)) {
-    return {
-      text: `Scroll analysis complete! 🌟 Your Food & Diet is the biggest energy drain (${foodRatio}% of overall outputs). Eating plant-based meals twice this week mitigates roughly 8 kg of CO₂!`,
-      categoryRatio: { label: 'Diet Factor', percent: foodRatio, color: '#fbbf24' },
-    };
-  }
-  if (/quick win|today/.test(q)) {
-    return {
-      text: `A quick win manifests! 💨 Hang your wet garments outdoors to air dry instead of using the tumble dryer. This saves 2.1 kg CO₂ and awards XP immediately!`,
-    };
-  }
-  if (/commut/.test(q)) {
-    return {
-      text: `Transportation scroll activated! 🚲 Switching from a petrol car to biking or walking decreases commute emissions by up to 90%!`,
-    };
-  }
-  if (/last week|compare/.test(q)) {
-    return {
-      text: `📈 Over the logged timeline, your impact is trending 14.5% below initial baseline marks. The forest guardians are pleased!`,
-    };
-  }
-  return {
-    text: `An excellent inquiry! Record every transaction on your ledger to receive active feedback and nurture your guardian seedling to full maturity.`,
-  };
+function generateMessageId(): string {
+  return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 const PRESET_PILLS = [
@@ -78,29 +50,28 @@ const PRESET_PILLS = [
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function AiInsights({ activities }: AiInsightsProps) {
+export default function AiInsights({ quizAnswers, activities }: AiInsightsProps) {
   const [inputText, setInputText] = useState('');
   const [loading,   setLoading]   = useState(false);
 
   const messagesEndRef   = useRef<HTMLDivElement | null>(null);
   const inputRef         = useRef<HTMLInputElement | null>(null);
-  const loadingTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clean up timers on unmount
-  useEffect(() => () => { if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current); }, []);
+  useEffect(() => () => {}, []);
 
-  // Compute food ratio from logged activities (memoised)
-  const foodRatio = useMemo(() => {
-    const totals = activities.reduce(
+  // Compute category totals from logged activities (memoised)
+  const totals = useMemo(() => {
+    return activities.reduce(
       (acc, act) => {
         if (act.co2Impact > 0) acc[act.category] = (acc[act.category] ?? 0) + act.co2Impact;
         return acc;
       },
       { transport: 0, food: 0, energy: 0, purchases: 0 } as Record<string, number>
     );
-    const sum = totals.transport + totals.food + totals.energy + totals.purchases;
-    return sum > 0 ? Math.round((totals.food / sum) * 100) : 42;
   }, [activities]);
+
+  const totalSum = totals.transport + totals.food + totals.energy + totals.purchases;
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -108,6 +79,7 @@ export default function AiInsights({ activities }: AiInsightsProps) {
       sender: 'ai',
       text:   "Greetings, Solar-Punk Summoner! 🍃 I've analyzed your consumption data. Your transport footprint has improved compared to earlier logs. Would you like personalised energy reduction tips?",
       time:   '9:41 AM',
+      date:   getCurrentDate(),
     },
   ]);
 
@@ -116,7 +88,7 @@ export default function AiInsights({ activities }: AiInsightsProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const handleSendMessage = useCallback((text: string) => {
+  const handleSendMessage = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
@@ -127,30 +99,58 @@ export default function AiInsights({ activities }: AiInsightsProps) {
       sender: 'user',
       text:   trimmed,
       time:   getCurrentTime(),
+      date:   getCurrentDate(),
     };
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText('');
     setLoading(true);
 
-    loadingTimerRef.current = setTimeout(() => {
-      sfx.playLevelUpSfx();
-      const { text: aiText, categoryRatio } = generateResponse(trimmed, foodRatio);
+    // Fetch AI insight inline so closure captures current totals + quizAnswers
+    let aiResponseText: string;
+    try {
+      const highestCategory = Object.keys(totals).reduce((a, b) =>
+        totals[a] > totals[b] ? a : b
+      );
+      const currentDailyAvg = totalSum / 30;
 
-      const aiMsg: Message = {
-        id:            generateMessageId(),
-        sender:        'ai',
-        text:          aiText,
-        time:          getCurrentTime(),
-        categoryRatio,
-      };
+      const response = await fetch('/api/generate-insights', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quizAnswers,
+          totals,
+          totalSum,
+          currentDailyAvg,
+          highestCategory,
+          userMessage: trimmed,
+        }),
+      });
 
-      setMessages((prev) => [...prev, aiMsg]);
-      setLoading(false);
-      // Return focus to input after AI responds
-      inputRef.current?.focus();
-    }, 1300);
-  }, [loading, foodRatio]);
+      if (!response.ok) {
+        const errorData = await response.json();
+        aiResponseText = (errorData as { error?: string }).error ?? 'Failed to fetch insights from the server.';
+      } else {
+        const data = await response.json();
+        aiResponseText = (data as { insight?: string }).insight ?? 'The Sage is currently meditating and cannot respond.';
+      }
+    } catch {
+      aiResponseText = 'A disruption in the leylines prevented the Sage from responding.';
+    }
+
+    sfx.playLevelUpSfx();
+    const aiMsg: Message = {
+      id:     generateMessageId(),
+      sender: 'ai',
+      text:   aiResponseText,
+      time:   getCurrentTime(),
+      date:   getCurrentDate(),
+    };
+
+    setMessages((prev) => [...prev, aiMsg]);
+    setLoading(false);
+    inputRef.current?.focus();
+  }, [loading, totals, totalSum, quizAnswers]);
 
   const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -211,9 +211,9 @@ export default function AiInsights({ activities }: AiInsightsProps) {
                 }`}
                 aria-label={`${isAi ? 'Sage advisor' : 'You'} at ${msg.time}: ${msg.text}`}
               >
-                <p className="font-sans text-xs font-bold leading-relaxed whitespace-pre-line">
+                <div className="font-sans text-xs font-bold leading-relaxed whitespace-pre-line prose prose-sm max-w-none">
                   {msg.text}
-                </p>
+                </div>
 
                 {isAi && msg.categoryRatio && (
                   <div
@@ -246,7 +246,7 @@ export default function AiInsights({ activities }: AiInsightsProps) {
                 )}
 
                 <time
-                  dateTime={new Date().toISOString().split('T')[0]}
+                  dateTime={msg.date}
                   className={`text-[9px] font-display font-bold block mt-1.5 ${isAi ? 'text-slate-400' : 'text-emerald-100'}`}
                   aria-hidden="true"
                 >

@@ -1,11 +1,17 @@
 import { useCallback, useMemo } from 'react';
-import { Challenge } from '../types';
+import type { Challenge } from '../types';
 import { CheckCircle, Compass, Trophy } from 'lucide-react';
 import { sfx } from '../utils/audio';
 
 import activeCommuteImg from '../../assets/eco_commute.png';
 import meatfreeDietImg from '../../assets/eco_diet.png';
 import coldWashImg from '../../assets/eco_laundry.png';
+import veganWeekImg from '../../assets/vegan_week.png';
+import thermostatImg from '../../assets/thermostat.png';
+import plasticFreeImg from '../../assets/plastic_free.png';
+import solarChargeImg from '../../assets/solar_charge.png';
+import harvestFeastImg from '../../assets/harvest_feast.png';
+import windTransitImg from '../../assets/wind_transit.png';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -60,6 +66,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Expert Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '🌱',
+    image:      veganWeekImg,
   },
   'ch-thermostat': {
     title:      'Thermostat Eclipse 🌡️',
@@ -67,6 +74,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Medium Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '🔥',
+    image:      thermostatImg,
   },
   'ch-plastic-free': {
     title:      'Zero Packaging Crusade 📦',
@@ -74,6 +82,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Medium Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '🛍️',
+    image:      plasticFreeImg,
   },
   'ch-solar-only': {
     title:      'Solar Core Charge ☀️',
@@ -81,6 +90,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Light Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '⚡',
+    image:      solarChargeImg,
   },
   'ch-local-farmers': {
     title:      'Leyline Harvest Feast 🌾',
@@ -88,6 +98,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Medium Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '🥕',
+    image:      harvestFeastImg,
   },
   'ch-car-free': {
     title:      'Wind Rider Transit 🚌',
@@ -95,6 +106,7 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     difficulty: 'Expert Challenge',
     xpBonus:    '+20 XP accepted / +85 XP reward',
     badge:      '🚴',
+    image:      windTransitImg,
   },
 } as const;
 
@@ -156,10 +168,6 @@ export default function WeeklyChallenges({
       >
         {challenges.map((ch) => {
           const detail = CHALLENGE_DETAILS[ch.id] ?? fallbackDetail(ch);
-
-          let statusLabel = 'Not yet accepted';
-          if (ch.isCompleted) statusLabel = 'Completed';
-          else if (ch.isAccepted) statusLabel = 'In progress — ready to claim';
 
           return (
             <li

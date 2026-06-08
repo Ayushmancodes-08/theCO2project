@@ -1,5 +1,5 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
-import { LoggedActivity, TabId } from '../types';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import type { LoggedActivity, TabId } from '../types';
 import {
   Sparkles, Lightbulb, Footprints, Thermometer,
   ArrowRight, Shield, Swords, Zap,
@@ -52,6 +52,11 @@ export default function DashboardOverview({
   const [slashEffect, setSlashEffect] = useState(false);
   const attackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Clean up timer on unmount
+  useEffect(() => () => {
+    if (attackTimerRef.current) clearTimeout(attackTimerRef.current);
+  }, []);
+
   // ── Derived stats (all memoised) ───────────────────────────────────────────
 
   const totals = useMemo(() =>
@@ -82,10 +87,10 @@ export default function DashboardOverview({
     return Math.max(1.2, current > 0 ? parseFloat(current.toFixed(1)) : baselineAnnual);
   }, [totalSum, baselineAnnual]);
 
-  const { totalXp, playerLevel, currentLevelProgressXp } = useMemo(() => {
+  const { playerLevel, currentLevelProgressXp } = useMemo(() => {
     const xp = 45 + activities.reduce((s, a) => s + (a.co2Impact < 0 ? 85 : 15), 0);
     const lvl = Math.max(1, Math.floor(xp / 100) + 1);
-    return { totalXp: xp, playerLevel: lvl, currentLevelProgressXp: xp % 100 };
+    return { playerLevel: lvl, currentLevelProgressXp: xp % 100 };
   }, [activities]);
 
   const { bossHp, bossHpPercent } = useMemo(() => {
@@ -98,7 +103,7 @@ export default function DashboardOverview({
     [playerLevel]
   );
 
-  const donutPercs = useMemo(() => {
+  const donutSegments = useMemo(() => {
     const t = totalSum > 0
       ? {
           transport: Math.round((totals.transport / totalSum) * 100),
@@ -107,7 +112,14 @@ export default function DashboardOverview({
           purchases:  Math.round((totals.purchases / totalSum) * 100),
         }
       : { transport: 35, food: 28, energy: 22, purchases: 15 };
-    return [t.transport, t.food, t.energy, t.purchases];
+      
+    const percs = [t.transport, t.food, t.energy, t.purchases];
+    let acc = 0;
+    return percs.map((perc, idx) => {
+      const offset = -acc;
+      acc += perc;
+      return { perc, offset, label: DONUT_SEGMENT_LABELS[idx], color: DONUT_COLORS[idx] };
+    });
   }, [totals, totalSum]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -124,9 +136,6 @@ export default function DashboardOverview({
   }, []);
 
   // ── Render ─────────────────────────────────────────────────────────────────
-
-  // Build donut segments
-  let accumulatedPercent = 0;
 
   return (
     <div className="space-y-6 animate-fade-in pb-10">
@@ -343,7 +352,7 @@ export default function DashboardOverview({
           >
             {gardenItems.map((item, idx) => (
               <li
-                key={idx}
+                key={`${item.name}-${idx}`}
                 className="w-12 h-12 flex flex-col items-center justify-center rounded-lg bg-white/70 shadow-sm border border-white/50 animate-float"
                 style={{ animationDelay: `${idx * 0.3}s` }}
                 aria-label={item.name}
@@ -423,26 +432,24 @@ export default function DashboardOverview({
               className="w-full h-full transform -rotate-90"
               viewBox="0 0 36 36"
               role="img"
-              aria-label={`Donut chart: Transport ${donutPercs[0]}%, Food ${donutPercs[1]}%, Energy ${donutPercs[2]}%, Purchases ${donutPercs[3]}%`}
+              aria-label={`Donut chart: Transport ${donutSegments[0]?.perc ?? 0}%, Food ${donutSegments[1]?.perc ?? 0}%, Energy ${donutSegments[2]?.perc ?? 0}%, Purchases ${donutSegments[3]?.perc ?? 0}%`}
             >
               <title>Emissions by category</title>
-              {donutPercs.map((perc, idx) => {
+              {donutSegments.map(({ perc, offset, label, color }) => {
                 if (perc <= 0) return null;
                 const strokeDasharray = `${perc} 100`;
-                const strokeDashoffset = -accumulatedPercent;
-                accumulatedPercent += perc;
                 return (
                   <circle
-                    key={idx}
+                    key={label}
                     cx="18" cy="18" r="15.915"
                     fill="transparent"
-                    stroke={DONUT_COLORS[idx]}
+                    stroke={color}
                     strokeWidth="4.5"
                     strokeDasharray={strokeDasharray}
-                    strokeDashoffset={strokeDashoffset}
+                    strokeDashoffset={offset}
                     className="transition-all duration-700"
                     strokeLinecap="round"
-                    aria-label={`${DONUT_SEGMENT_LABELS[idx]}: ${perc}%`}
+                    aria-label={`${label}: ${perc}%`}
                   />
                 );
               })}
@@ -455,15 +462,15 @@ export default function DashboardOverview({
 
           {/* Legend */}
           <ul className="grid grid-cols-2 gap-2 w-full border-t border-slate-100 pt-4 mt-4 text-left list-none p-0 m-0" role="list" aria-label="Chart legend">
-            {DONUT_SEGMENT_LABELS.map((label, idx) => (
-              <li key={idx} className="flex items-center gap-2">
+            {donutSegments.map(({ label, color, perc }) => (
+              <li key={label} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full shrink-0 border border-white/50"
-                  style={{ backgroundColor: DONUT_COLORS[idx] }}
+                  style={{ backgroundColor: color }}
                   aria-hidden="true"
                 />
                 <span className="font-sans text-[11px] font-bold text-slate-600 truncate">
-                  {label} ({donutPercs[idx]}%)
+                  {label} ({perc}%)
                 </span>
               </li>
             ))}

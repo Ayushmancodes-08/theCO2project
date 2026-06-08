@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useId } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,6 +50,7 @@ function safeReadAvatarClass(): AvatarClass {
 
 export default function ChibiAvatar({ level, footprint }: ChibiAvatarProps) {
   const [avatarClass, setAvatarClass] = useState<AvatarClass>(safeReadAvatarClass);
+  const hpGaugeId = useId();
 
   // Re-read from storage on mount (in case another tab changed it)
   useEffect(() => {
@@ -209,7 +210,7 @@ export default function ChibiAvatar({ level, footprint }: ChibiAvatarProps) {
         </h3>
 
         <div className="flex items-center gap-2 justify-center px-4">
-          <span className="text-[10px] font-display font-extrabold text-slate-500 uppercase" id="hp-gauge-label">
+          <span className="text-[10px] font-display font-extrabold text-slate-500 uppercase" id={hpGaugeId}>
             HP Gauge:
           </span>
           <div
@@ -218,7 +219,7 @@ export default function ChibiAvatar({ level, footprint }: ChibiAvatarProps) {
             aria-valuenow={hp}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-labelledby="hp-gauge-label"
+            aria-labelledby={hpGaugeId}
             aria-label={`Avatar HP: ${hp}%`}
           >
             <div

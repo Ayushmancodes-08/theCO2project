@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { QuizAnswers, LoggedActivity, Challenge, TabId } from './types';
+import type { QuizAnswers, LoggedActivity, Challenge, TabId } from './types';
 import { calculateAnnualBaseline, generate30DayHistory } from './utils/carbonCalc';
 
 // Import components
@@ -286,15 +286,13 @@ export default function App() {
 
   // ── Derived stats (memoised) ──────────────────────────────────────────────
 
-  const totalWeeklySaved = useMemo(() =>
-    challenges
-      .filter((ch) => ch.isCompleted)
-      .reduce((sum, ch) => sum + ch.co2Savings, 0),
+  const totalWeeklySaved = useMemo(
+    () => challenges.filter((ch) => ch.isCompleted).reduce((sum, ch) => sum + ch.co2Savings, 0),
     [challenges]
   );
 
-  const baselineAnnualTonnes = useMemo(() =>
-    quizAnswers ? calculateAnnualBaseline(quizAnswers) : 0,
+  const baselineAnnualTonnes = useMemo(
+    () => (quizAnswers ? calculateAnnualBaseline(quizAnswers) : 0),
     [quizAnswers]
   );
 
@@ -467,7 +465,6 @@ export default function App() {
               onAddActivity={handleAddActivity}
               onDeleteActivity={handleDeleteActivity}
               activities={activities}
-              quizAnswers={quizAnswers}
             />
           )}
 
@@ -487,7 +484,6 @@ export default function App() {
           {activeTab === 'trend' && (
             <ProgressTrend
               activities={activities}
-              onDeleteActivity={handleDeleteActivity}
             />
           )}
         </main>

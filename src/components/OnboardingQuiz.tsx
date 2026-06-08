@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   QuizAnswers,
-  TransportMode, DietType, HomeEnergy, PurchaseHabit,
+  TransportMode, DietType, HomeEnergy, PurchaseHabit, FlightFrequency,
 } from '../types';
 import { calculateAnnualBaseline } from '../utils/carbonCalc';
 import { Footprints, Bus, Zap, Car, Check, Flame, Sun, Compass } from 'lucide-react';
@@ -101,9 +101,9 @@ export default function OnboardingQuiz({ onComplete }: OnboardingQuizProps) {
     commuteDistance: 20,
     dietType:        'meat_light',
     homeEnergy:      'mix',
+    flightFrequency: 'moderate',
     purchaseHabit:   'moderate',
   });
-  const [calculating,   setCalculating]   = useState(false);
   const [progressWidth, setProgressWidth] = useState(0);
   const [showResult,    setShowResult]    = useState(false);
 
@@ -119,7 +119,6 @@ export default function OnboardingQuiz({ onComplete }: OnboardingQuizProps) {
   // Trigger calculation animation on step 6
   useEffect(() => {
     if (step !== 6) return;
-    setCalculating(true);
     sfx.playLevelUpSfx();
     timer1Ref.current = setTimeout(() => setProgressWidth(78),    300);
     timer2Ref.current = setTimeout(() => setShowResult(true), 1500);
@@ -372,12 +371,14 @@ export default function OnboardingQuiz({ onComplete }: OnboardingQuizProps) {
             <fieldset>
               <legend className="sr-only">Select your annual flight frequency</legend>
               <div className="grid grid-cols-1 gap-3" role="radiogroup" aria-required="true">
-                {[
-                  { id: 'low'      as PurchaseHabit, label: 'Earthy Groundward Habit (0–1 flights/yr) 🌲' },
-                  { id: 'moderate' as PurchaseHabit, label: 'Periodic Sky Voyager (2–5 flights/yr)'       },
-                  { id: 'high'     as PurchaseHabit, label: 'Frequent Air Teleporter (6+ flights/yr) 💨'  },
-                ].map((opt) => {
-                  const isSelected = answers.purchaseHabit === opt.id;
+                {(
+                  [
+                    { id: 'low',      label: 'Earthy Groundward Habit (0–1 flights/yr) 🌲' },
+                    { id: 'moderate', label: 'Periodic Sky Voyager (2–5 flights/yr)'       },
+                    { id: 'high',     label: 'Frequent Air Teleporter (6+ flights/yr) 💨'  },
+                  ] as { id: FlightFrequency; label: string }[]
+                ).map((opt) => {
+                  const isSelected = answers.flightFrequency === opt.id;
                   return (
                     <button
                       key={opt.id}
@@ -385,7 +386,7 @@ export default function OnboardingQuiz({ onComplete }: OnboardingQuizProps) {
                       role="radio"
                       aria-checked={isSelected}
                       id={`flight-opt-${opt.id}`}
-                      onClick={() => setField('purchaseHabit', opt.id)}
+                      onClick={() => setField('flightFrequency', opt.id)}
                       className={`flex items-center p-4 border rounded-xl transition-all duration-150 cursor-pointer text-left w-full ${
                         isSelected
                           ? 'border-emerald-500 bg-emerald-500 text-white shadow-md'
@@ -500,7 +501,7 @@ export default function OnboardingQuiz({ onComplete }: OnboardingQuizProps) {
                 aria-valuenow={progressWidth}
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-label={`Carbon footprint: ${calculating ? 'calculating…' : `${finalFootprint.toFixed(1)} tonnes CO₂`}`}
+                aria-label={`Carbon footprint: ${showResult ? `${finalFootprint.toFixed(1)} tonnes CO₂` : 'calculating…'}`}
               >
                 <div
                   className="h-full bg-gradient-to-r from-emerald-400 to-amber-400 transition-all duration-[1200ms] ease-out rounded-full"

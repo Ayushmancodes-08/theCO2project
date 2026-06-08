@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useId } from 'react';
-import { LoggedActivity, ActivityCategory } from '../types';
+import type { LoggedActivity, ActivityCategory } from '../types';
 import { TrendingDown } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,7 +23,6 @@ interface CategoryMeta {
 
 interface ProgressTrendProps {
   activities:       LoggedActivity[];
-  onDeleteActivity: (id: string) => void;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -165,6 +164,7 @@ export default function ProgressTrend({ activities }: ProgressTrendProps) {
             className="w-full h-[180px] overflow-visible"
             aria-hidden="true"
           >
+            <title>30-day CO₂ emissions trend line chart</title>
             {/* Grid lines */}
             <line x1="0" y1="30"  x2={SVG_WIDTH} y2="30"  stroke="rgba(15,23,42,0.08)" strokeWidth="1" strokeDasharray="6 6" />
             <line x1="0" y1="105" x2={SVG_WIDTH} y2="105" stroke="rgba(15,23,42,0.08)" strokeWidth="1" strokeDasharray="6 6" />
@@ -191,6 +191,7 @@ export default function ProgressTrend({ activities }: ProgressTrendProps) {
                 onMouseLeave={handleMouseLeave}
                 onFocus={() => handleFocus(idx)}
                 onBlur={handleBlur}
+                onClick={() => handleFocus(idx)}
                 className="cursor-pointer"
                 role="button"
                 tabIndex={0}
@@ -230,7 +231,7 @@ export default function ProgressTrend({ activities }: ProgressTrendProps) {
                   <div key={cat.id} className="flex justify-between gap-4">
                     <span>{cat.label}:</span>
                     <span className="text-white font-bold">
-                      {(last30Days[hoverIndex][cat.id] as number).toFixed(1)} kg
+                      {Number(last30Days[hoverIndex]?.[cat.id] || 0).toFixed(1)} kg
                     </span>
                   </div>
                 ))}

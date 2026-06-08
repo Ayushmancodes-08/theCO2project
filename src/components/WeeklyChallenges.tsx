@@ -54,6 +54,48 @@ const CHALLENGE_DETAILS: Readonly<Record<string, ChallengeDetail>> = {
     badge:      '💨',
     image:      coldWashImg,
   },
+  'ch-vegan-week': {
+    title:      'Ethereal Vegan Week 🌿',
+    savings:    'Saves 19.8 kg CO₂',
+    difficulty: 'Expert Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '🌱',
+  },
+  'ch-thermostat': {
+    title:      'Thermostat Eclipse 🌡️',
+    savings:    'Saves 5.5 kg CO₂',
+    difficulty: 'Medium Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '🔥',
+  },
+  'ch-plastic-free': {
+    title:      'Zero Packaging Crusade 📦',
+    savings:    'Saves 3.5 kg CO₂',
+    difficulty: 'Medium Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '🛍️',
+  },
+  'ch-solar-only': {
+    title:      'Solar Core Charge ☀️',
+    savings:    'Saves 1.8 kg CO₂',
+    difficulty: 'Light Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '⚡',
+  },
+  'ch-local-farmers': {
+    title:      'Leyline Harvest Feast 🌾',
+    savings:    'Saves 6.2 kg CO₂',
+    difficulty: 'Medium Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '🥕',
+  },
+  'ch-car-free': {
+    title:      'Wind Rider Transit 🚌',
+    savings:    'Saves 12.0 kg CO₂',
+    difficulty: 'Expert Challenge',
+    xpBonus:    '+20 XP accepted / +85 XP reward',
+    badge:      '🚴',
+  },
 } as const;
 
 function fallbackDetail(ch: Challenge): ChallengeDetail {

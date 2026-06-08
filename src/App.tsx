@@ -83,6 +83,72 @@ const INITIAL_CHALLENGES: Challenge[] = [
     isAccepted: false,
     isCompleted: false,
   },
+  {
+    id: 'ch-vegan-week',
+    title: 'Ethereal Vegan Week',
+    description:
+      'Commit to a fully plant-based diet for 7 days to restore soil fertility indices.',
+    category: 'food',
+    co2Savings: 19.8,
+    duration: '1 Week',
+    isAccepted: false,
+    isCompleted: false,
+  },
+  {
+    id: 'ch-thermostat',
+    title: 'Thermostat Eclipse',
+    description:
+      'Lower heating by 2°C or raise AC by 2°C for 5 days. Rely on natural garments.',
+    category: 'energy',
+    co2Savings: 5.5,
+    duration: '5 Days',
+    isAccepted: false,
+    isCompleted: false,
+  },
+  {
+    id: 'ch-plastic-free',
+    title: 'Zero Packaging Crusade',
+    description:
+      'Avoid single-use plastic and packaging on all purchases this week.',
+    category: 'purchases',
+    co2Savings: 3.5,
+    duration: '1 Week',
+    isAccepted: false,
+    isCompleted: false,
+  },
+  {
+    id: 'ch-solar-only',
+    title: 'Solar Core Charge',
+    description:
+      'Unplug all standby devices and use only solar/rechargeable lamps for one evening.',
+    category: 'energy',
+    co2Savings: 1.8,
+    duration: '1 Evening',
+    isAccepted: false,
+    isCompleted: false,
+  },
+  {
+    id: 'ch-local-farmers',
+    title: 'Leyline Harvest Feast',
+    description:
+      'Source 100% of your ingredients from local farmers or organic markets.',
+    category: 'food',
+    co2Savings: 6.2,
+    duration: '1 Day',
+    isAccepted: false,
+    isCompleted: false,
+  },
+  {
+    id: 'ch-car-free',
+    title: 'Wind Rider Transit',
+    description:
+      'Swap three car trips of any distance for public transportation or cycling.',
+    category: 'transport',
+    co2Savings: 12.0,
+    duration: '3 Trips',
+    isAccepted: false,
+    isCompleted: false,
+  },
 ];
 
 // ─── Navigation Config ────────────────────────────────────────────────────────

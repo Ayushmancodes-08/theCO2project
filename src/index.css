@@ -12,15 +12,16 @@
   
   --color-brand-accent: #fbbf24; /* Sunset Gold RPG Level Accent */
   --color-brand-danger: #ef4444; /* High Impact Alert Red */
-  --color-brand-bg: #fefcf6; /* Butter Warm Parchment */
-  --color-brand-border: #1e293b; /* Tough Dark Line Art Border */
+  --color-brand-bg: #e0f2fe; /* Light sky blue background for premium glass look */
+  --color-brand-border: rgba(255, 255, 255, 0.4); /* Transparent glass borders */
   --color-on-surface: #0f172a; /* Midnight Blue Ink */
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #fefcf6;
+  background: radial-gradient(circle at top right, #f0fdf4 0%, #e0f2fe 100%);
   color: #0f172a;
+  min-height: 100vh;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -31,54 +32,71 @@ h1, h2, h3, h4, .font-display {
   font-family: var(--font-mono);
 }
 
-/* Custom progress bar styles to match scientific low rounded shapes */
+/* Glassmorphism Styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Neumorphism Styles */
+.neumorph-flat {
+  background: #ffffff;
+  box-shadow: 6px 6px 12px #cbd5e1, -6px -6px 12px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.neumorph-button {
+  background: #f8fafc;
+  box-shadow: 4px 4px 8px #cbd5e1, -4px -4px 8px #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neumorph-button:hover:not(:disabled) {
+  box-shadow: 2px 2px 4px #cbd5e1, -2px -2px 4px #ffffff;
+  transform: translateY(1px);
+}
+
+.neumorph-button:active:not(:disabled) {
+  box-shadow: inset 3px 3px 6px #cbd5e1, inset -3px -3px 6px #ffffff;
+  transform: translateY(2px);
+}
+
+.neumorph-inset {
+  box-shadow: inset 4px 4px 8px #cbd5e1, inset -4px -4px 8px #ffffff;
+  background: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Specific component presets matching neumorphic design principles */
 input[type="range"]::-webkit-slider-thumb {
   background-color: #10b981;
-  border: 2px solid #1e293b;
+  border: 2px solid #ffffff;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.15), -2px -2px 5px rgba(255,255,255,0.8);
   border-radius: 9999px;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
-/* Gaming Retro RPG Neo-Brutalist Border shadows */
-.game-card {
-  background-color: #ffffff;
-  border: 2px solid #1e293b;
-  box-shadow: 4px 4px 0px 0px #1e293b;
-  transition: all 0.2s ease-in-out;
-}
-
-.game-card:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px 0px #1e293b;
-}
-
-.game-btn {
-  background-color: #10b981;
-  color: #ffffff;
-  border: 2px solid #1e293b;
-  box-shadow: 2px 2px 0px 0px #1e293b;
-  transition: all 0.15s ease-in-out;
-}
-
-.game-btn:hover:not(:disabled) {
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px 0px #1e293b;
-  filter: brightness(1.05);
-}
-
-.game-btn:active:not(:disabled) {
-  transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px 0px #1e293b;
-}
-
-/* Custom floating animation representing cute anime pets */
+/* Custom animations representing cute anime pets & interactive battles */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-8px) rotate(2deg);
+    transform: translateY(-10px) rotate(3deg);
   }
 }
 
@@ -96,7 +114,7 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .animate-spin-slow {
-  animation: spin-slow 12s linear infinite;
+  animation: spin-slow 20s linear infinite;
 }
 
 @keyframes pulse-soft {
@@ -105,12 +123,31 @@ input[type="range"]::-webkit-slider-thumb {
     transform: scale(1);
   }
   50% {
-    opacity: 0.85;
-    transform: scale(0.98);
+    opacity: 0.9;
+    transform: scale(0.96);
   }
 }
 
 .animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
+  animation: pulse-soft 3s ease-in-out infinite;
 }
 
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px) rotate(-2deg); }
+  75% { transform: translateX(4px) rotate(2deg); }
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes slash {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1.5); }
+  50% { transform: scale(1.3) rotate(15deg); filter: brightness(2); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.animate-slash {
+  animation: slash 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}

@@ -175,7 +175,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#fefcf6] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <Leaf className="w-8 h-8 text-emerald-500 animate-spin" />
         <span className="text-xs font-display font-semibold text-slate-500 mt-4 tracking-widest uppercase">
           Synthesizing EcoQuest Realm...
@@ -187,10 +187,10 @@ export default function App() {
   // Render onboarding flow state
   if (!quizAnswers) {
     return (
-      <div className="min-h-screen bg-[#fefcf6] flex flex-col justify-between py-6 px-4">
+      <div className="min-h-screen flex flex-col justify-between py-6 px-4">
         {/* Intro Logo Header */}
         <div className="text-center space-y-2.5 max-w-sm mx-auto my-6 select-none">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-full text-xs font-bold shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500 text-white border border-emerald-400 rounded-full text-xs font-bold shadow-sm">
             <Leaf className="w-3.5 h-3.5 fill-current animate-bounce" />
             <span className="font-display text-[9px] uppercase font-black tracking-widest">REALTIME CARBON PORTAL</span>
           </div>
@@ -208,10 +208,10 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fefcf6] text-[#0f172a] antialiased flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen text-[#0f172a] antialiased flex flex-col relative overflow-x-hidden">
       
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 w-full z-40 bg-[#fefcf6]/90 backdrop-blur-sm border-b-2 border-brand-border h-16 flex justify-between items-center px-4 select-none">
+      {/* Mobile Header - Glassmorphic */}
+      <header className="lg:hidden fixed top-0 w-full z-40 bg-white/70 backdrop-blur-md border-b border-white/30 h-16 flex justify-between items-center px-4 select-none">
         <span className="font-display text-lg font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5 pt-1">
           <span className="animate-float">🌱</span> ECOQUEST
         </span>
@@ -219,12 +219,12 @@ export default function App() {
           <button 
             onClick={handleResetProfile}
             id="mobile-reset-profile"
-            className="p-1.5 text-slate-500 hover:text-red-500 hover:bg-red-50 border border-slate-200 rounded-lg cursor-pointer"
+            className="p-2 text-slate-500 hover:text-red-500 hover:bg-red-50/50 border border-white/40 rounded-xl cursor-pointer"
             title="Eclipse profile assessment"
           >
             <RefreshCcw className="w-4 h-4" />
           </button>
-          <div className="w-8 h-8 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center text-white text-xs select-none font-black font-mono shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <div className="w-8 h-8 rounded-full bg-emerald-500 border border-emerald-400 flex items-center justify-center text-white text-xs select-none font-black font-mono shadow-sm">
             S
           </div>
         </div>
@@ -233,20 +233,20 @@ export default function App() {
       {/* Main Structural Layout */}
       <div className="flex flex-1 max-w-7xl w-full mx-auto pt-16 lg:pt-0 pb-20 lg:pb-0 h-full">
         
-        {/* Left Side Navigation Pane (Desktop Only) */}
-        <aside className="w-64 hidden lg:flex flex-col sticky top-0 left-0 border-r-2 border-brand-border p-6 h-screen select-none justify-between bg-white z-20">
+        {/* Left Side Navigation Pane (Desktop Only) - Glassmorphic sidebar */}
+        <aside className="w-64 hidden lg:flex flex-col sticky top-0 left-0 border-r border-white/30 p-6 h-screen select-none justify-between bg-white/45 backdrop-blur-md z-20">
           <div className="space-y-8">
             <div className="pt-2">
               <h1 className="font-display text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2 uppercase">
                 <span className="animate-float">🌱</span> EcoQuest
               </h1>
-              <p className="text-emerald-600 font-display text-[9px] font-black uppercase tracking-widest mt-1 bg-emerald-50 border border-emerald-200 py-0.5 px-2 rounded-full w-fit">
+              <p className="text-emerald-700 font-display text-[9px] font-black uppercase tracking-widest mt-1 bg-emerald-50/70 border border-emerald-200/50 py-1 px-2.5 rounded-full w-fit">
                 Solar Sanctuary
               </p>
             </div>
 
             {/* Nav Menu */}
-            <nav className="flex flex-col gap-1.5">
+            <nav className="flex flex-col gap-2">
               {[
                 { id: 'dashboard', label: 'Scoreboard', icon: LayoutDashboard },
                 { id: 'tracker', label: 'Quest Logger', icon: FileText },
@@ -264,10 +264,10 @@ export default function App() {
                       setActiveTab(item.id as any);
                     }}
                     id={`sidebar-link-${item.id}`}
-                    className={`flex items-center gap-3 px-4 py-3.5 text-xs font-display font-black uppercase tracking-wider transition-all rounded-lg border-2 cursor-pointer text-left ${
+                    className={`flex items-center gap-3 px-4 py-3 text-xs font-display font-black uppercase tracking-wider transition-all rounded-xl border cursor-pointer text-left ${
                       isActive
-                        ? 'bg-slate-900 border-slate-950 text-white font-black shadow-[3px_3px_0px_0px_rgba(16,185,129,1)] scale-102Translate'
-                        : 'text-slate-600 border-transparent hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300'
+                        ? 'bg-slate-900 border-slate-950 text-white font-black shadow-md'
+                        : 'text-slate-600 border-transparent hover:bg-white/50 hover:text-slate-900'
                     }`}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
@@ -278,20 +278,20 @@ export default function App() {
             </nav>
           </div>
 
-          <div className="space-y-4 pt-4 border-t-2 border-slate-100">
+          <div className="space-y-4 pt-4 border-t border-white/20">
             <button
               onClick={() => {
                 sfx.playLogSfx();
                 setActiveTab('tracker');
               }}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white border-2 border-slate-900 font-display text-[10px] font-black py-3 uppercase tracking-wider rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px] transition-all cursor-pointer text-center"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white border border-emerald-400 font-display text-[10px] font-black py-3.5 uppercase tracking-wider rounded-xl shadow-md cursor-pointer text-center"
             >
               Log Quest Deed ⚔️
             </button>
 
             <button
               onClick={handleResetProfile}
-              className="w-full border-2 border-brand-border hover:bg-red-50 text-slate-500 hover:text-red-600 font-display text-[9px] font-black py-2.5 uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full border border-white/30 hover:bg-red-50/50 text-slate-500 hover:text-red-600 font-display text-[9px] font-black py-2.5 uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 shrink-0" />
               <span>Eclipse Reset</span>
@@ -344,8 +344,8 @@ export default function App() {
 
       </div>
 
-      {/* Mobile bottom persistent tab bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 bg-[#fefcf6] border-t-2 border-brand-border px-2 select-none shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+      {/* Mobile bottom persistent tab bar - Glassmorphic */}
+      <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 flex justify-around items-center h-20 bg-white/70 backdrop-blur-md border-t border-white/30 px-2 select-none shadow-lg">
         {[
           { id: 'dashboard', label: 'Scoreboard', icon: LayoutDashboard },
           { id: 'tracker', label: 'Log', icon: FileText },

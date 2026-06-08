@@ -1,5 +1,5 @@
 import { Challenge } from '../types';
-import { CheckCircle, Award, Compass, Sparkles, Trophy } from 'lucide-react';
+import { CheckCircle, Award, Compass, Trophy } from 'lucide-react';
 import { sfx } from '../utils/audio';
 
 interface WeeklyChallengesProps {
@@ -18,7 +18,6 @@ export default function WeeklyChallenges({
   const weeklyGoal = 25.0;
   const progressPercent = Math.min(100, (totalSaved / weeklyGoal) * 100);
 
-  // Gamified details for each challenge
   const challengeDetails = {
     'ch-active-commute': {
       title: 'Walk Instead of Drive 🌲',
@@ -82,21 +81,20 @@ export default function WeeklyChallenges({
             <article
               key={ch.id}
               id={`challenge-card-${ch.id}`}
-              className={`flex flex-col justify-between p-5 border-2 rounded-xl transition-all duration-300 relative overflow-hidden ${
+              className={`flex flex-col justify-between p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden glass-panel shadow-md ${
                 ch.isCompleted
-                  ? 'bg-emerald-500 border-slate-900 text-white shadow-[2px_2px_0px_0px_rgba(30,41,59,1)]'
+                  ? 'bg-emerald-500/80 border-emerald-400 text-white'
                   : ch.isAccepted
-                  ? 'bg-amber-50/50 border-emerald-500 shadow-[4px_4px_0px_0px_rgba(16,185,129,1)]'
-                  : 'bg-white border-brand-border shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(30,41,59,1)] h-full'
+                  ? 'bg-amber-50/70 border-emerald-300'
+                  : 'hover:-translate-y-1 hover:shadow-lg h-full'
               }`}
             >
               <div className="space-y-4">
-                {/* Solarpunk Graphic badge instead of dry stock placeholder photos */}
-                <div className={`aspect-video w-full rounded-lg border-2 border-slate-800 flex flex-col items-center justify-center relative overflow-hidden ${ch.isCompleted ? 'bg-emerald-600' : 'bg-slate-50'}`}>
-                  {/* Subtle anime sunbeams background */}
+                {/* Solarpunk Graphic badge */}
+                <div className={`aspect-video w-full rounded-xl border flex flex-col items-center justify-center relative overflow-hidden ${ch.isCompleted ? 'bg-emerald-600/50 border-emerald-400' : 'bg-white/40 border-white/50 shadow-inner'}`}>
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.08)_0,transparent_100%)]" />
                   <span className={`text-5xl block select-none ${ch.isCompleted ? 'grayscale opacity-75' : 'animate-float'}`}>{detail.badge}</span>
-                  <span className={`text-[9px] font-display font-black uppercase tracking-wider mt-2.5 px-2 py-0.5 rounded border border-slate-800 ${ch.isCompleted ? 'bg-emerald-700 text-emerald-100' : 'bg-white text-slate-700'}`}>
+                  <span className={`text-[9px] font-display font-black uppercase tracking-wider mt-2.5 px-2.5 py-0.5 rounded-full border ${ch.isCompleted ? 'bg-emerald-700/80 text-emerald-100 border-emerald-600' : 'bg-white/90 text-slate-600 border-slate-200 shadow-sm'}`}>
                     {detail.difficulty}
                   </span>
                 </div>
@@ -108,19 +106,19 @@ export default function WeeklyChallenges({
                   <p className={`font-sans text-[11px] font-semibold text-slate-500 leading-relaxed ${ch.isCompleted ? 'text-emerald-100' : ''}`}>
                     {ch.description}
                   </p>
-                  <p className={`font-display text-[10px] font-black uppercase tracking-wider mt-1.5 inline-block ${ch.isCompleted ? 'text-yellow-300' : 'text-emerald-600'}`}>
+                  <p className={`font-display text-[10px] font-black uppercase tracking-wider mt-2 inline-block ${ch.isCompleted ? 'text-yellow-300' : 'text-emerald-600'}`}>
                     ✨ {detail.savings} saved
                   </p>
                 </div>
               </div>
 
               {/* Accept/Complete Interactive buttons */}
-              <div className="pt-4 mt-4 border-t border-dashed border-slate-200">
+              <div className="pt-4 mt-4 border-t border-dashed border-slate-200/40">
                 {!ch.isAccepted ? (
                   <button
                     onClick={() => handleAcceptClick(ch.id)}
                     id={`accept-challenge-btn-${ch.id}`}
-                    className="w-full bg-white border-2 border-slate-900 text-slate-800 font-display text-[10px] font-black py-2.5 uppercase tracking-widest rounded shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-y-[1px] hover:bg-slate-50 transition-all cursor-pointer text-center"
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-display text-[10px] font-black py-3 uppercase tracking-widest rounded-xl transition-all cursor-pointer text-center shadow-md"
                   >
                     Accept Quest ➔
                   </button>
@@ -128,12 +126,12 @@ export default function WeeklyChallenges({
                   <button
                     onClick={() => handleCompleteClick(ch.id)}
                     id={`complete-challenge-btn-${ch.id}`}
-                    className="w-full bg-amber-400 border-2 border-slate-900 text-slate-900 font-display text-[10px] font-black py-2.5 uppercase tracking-widest rounded shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] active:translate-y-[1px] hover:bg-amber-350 transition-all cursor-pointer text-center"
+                    className="w-full bg-amber-400 hover:bg-amber-350 text-slate-900 border border-white/30 font-display text-[10px] font-black py-3 uppercase tracking-widest rounded-xl transition-all cursor-pointer text-center shadow-md animate-pulse"
                   >
                     Claim Reward 🏆
                   </button>
                 ) : (
-                  <div className="w-full bg-emerald-600/65 border-2 border-transparent text-emerald-100 py-2.5 rounded-lg font-display text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-default">
+                  <div className="w-full bg-emerald-600/70 text-emerald-100 py-3 rounded-xl font-display text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-default border border-emerald-500">
                     <CheckCircle className="w-4 h-4 text-yellow-300 shrink-0" />
                     <span>Mitigation Achieved</span>
                   </div>
@@ -145,11 +143,11 @@ export default function WeeklyChallenges({
       </div>
 
       {/* Progress metrics and scoreboard summary */}
-      <section className="border-2 border-brand-border bg-white p-5 rounded-xl shadow-[4px_4px_0px_0px_rgba(30,41,59,1)] flex flex-col md:flex-row justify-between items-center gap-5">
+      <section className="glass-panel p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-center gap-5">
         <div className="text-center md:text-left space-y-1">
           <div className="flex items-center gap-1 justify-center md:justify-start">
             <Compass className="w-4 h-4 text-emerald-500 animate-spin-slow" />
-            <p className="font-display text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <p className="font-display text-[10px] font-black text-slate-400 uppercase tracking-widest">
               Weekly Progress Ledger
             </p>
           </div>
@@ -167,7 +165,7 @@ export default function WeeklyChallenges({
             <span>Progress: {progressPercent.toFixed(0)}%</span>
             <span>Target: {weeklyGoal} kg CO₂</span>
           </div>
-          <div className="h-4 bg-slate-100 border-2 border-slate-800 rounded-full overflow-hidden p-0.5">
+          <div className="h-4 neumorph-inset rounded-full overflow-hidden p-0.5">
             <div
               className="h-full bg-gradient-to-r from-emerald-400 to-amber-400 transition-all duration-500 rounded-full"
               style={{ width: `${progressPercent}%` }}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { QuizAnswers, LoggedActivity } from '../types';
-import { Send, Sparkles, MessageCircle, RefreshCw, Compass } from 'lucide-react';
+import { Send, Sparkles, RefreshCw } from 'lucide-react';
 import { sfx } from '../utils/audio';
 
 interface AiInsightsProps {
@@ -120,18 +120,18 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
   };
 
   return (
-    <div className="flex flex-col h-[520px] bg-white border-2 border-brand-border rounded-xl overflow-hidden animate-fade-in shadow-[4px_4px_0px_0px_#1e293b] select-none">
+    <div className="flex flex-col h-[520px] glass-panel rounded-2xl overflow-hidden animate-fade-in shadow-md select-none">
       
       {/* Advisor Header */}
-      <div className="px-6 py-4 border-b-2 border-brand-border flex items-center justify-between bg-white shrink-0">
+      <div className="px-6 py-4 border-b border-white/30 flex items-center justify-between bg-white/40 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center text-xl">
+          <div className="w-10 h-10 rounded-full bg-emerald-500 border border-white/40 flex items-center justify-center text-xl shadow-xs">
             🧠
           </div>
           <div>
             <h1 className="font-display text-sm font-black text-slate-800 uppercase tracking-wide">Solar-Punk Chibi Sage</h1>
             <p className="text-[10px] text-emerald-600 flex items-center gap-1.5 mt-0.5 font-bold">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block border border-slate-800" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse inline-block border border-white/50" />
               Guild Carbon Intelligence Online
             </p>
           </div>
@@ -139,7 +139,7 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
       </div>
 
       {/* Messages Feed Area */}
-      <div className="flex-grow p-5 overflow-y-auto space-y-4 bg-slate-50">
+      <div className="flex-grow p-5 overflow-y-auto space-y-4 bg-slate-50/30">
         {messages.map((msg, idx) => {
           const isAi = msg.sender === 'ai';
           return (
@@ -148,21 +148,21 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
               className={`flex ${isAi ? 'justify-start' : 'justify-end'} max-w-full`}
             >
               <div
-                className={`p-4 rounded-xl max-w-[85%] md:max-w-[70%] border-2 shadow-[2px_2px_0px_0px_rgba(30,41,59,1)] text-left ${
+                className={`p-4 rounded-2xl max-w-[85%] md:max-w-[70%] border shadow-xs text-left ${
                   isAi
-                    ? 'bg-white border-slate-950 text-slate-800'
-                    : 'bg-emerald-500 border-slate-950 text-white'
+                    ? 'bg-white/90 border-white/60 text-slate-700'
+                    : 'bg-emerald-500 border-emerald-400 text-white shadow-md'
                 }`}
               >
-                <p className="font-sans text-xs font-semibold leading-relaxed whitespace-pre-line">
+                <p className="font-sans text-xs font-bold leading-relaxed whitespace-pre-line">
                   {msg.text}
                 </p>
 
                 {isAi && msg.categoryRatio && (
-                  <div className="mt-3 p-3 bg-slate-50 border border-slate-300 rounded flex items-center gap-3">
+                  <div className="mt-3 p-3 bg-slate-100/60 border border-slate-200 rounded-xl flex items-center gap-3">
                     <span className="text-sm">🍛</span>
                     <div className="flex-grow space-y-1.5">
-                      <div className="h-2.5 w-full bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                      <div className="h-2.5 w-full neumorph-inset rounded-full overflow-hidden p-0.5">
                         <div
                           className="h-full rounded-full"
                           style={{
@@ -195,9 +195,9 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white border-2 border-slate-950 p-4 rounded-xl flex items-center gap-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-pulse">
+            <div className="bg-white/80 border border-white/50 p-4 rounded-2xl flex items-center gap-2.5 shadow-xs animate-pulse">
               <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" />
-              <span className="font-sans text-xs font-bold text-slate-500">
+              <span className="font-sans text-xs font-bold text-slate-400">
                 Sage is brewing solar scroll insights...
               </span>
             </div>
@@ -208,14 +208,14 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
       </div>
 
       {/* Inputs */}
-      <div className="p-4 bg-white border-t-2 border-brand-border shrink-0 space-y-3">
+      <div className="p-4 bg-white/40 border-t border-white/30 shrink-0 space-y-3">
         {/* Preset Pills */}
         <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar select-none">
           {presetPills.map((pill, idx) => (
             <button
               key={idx}
               onClick={() => handleSendMessage(pill)}
-              className="whitespace-nowrap px-3.5 py-1.5 bg-slate-50 hover:bg-emerald-50 border-2 border-brand-border text-slate-700 font-display text-[9px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer"
+              className="whitespace-nowrap px-3.5 py-1.5 bg-white/80 border border-white/50 text-slate-600 font-display text-[9px] font-black uppercase tracking-wider rounded-xl transition-all cursor-pointer shadow-xs hover:bg-slate-100"
             >
               {pill}
             </button>
@@ -238,19 +238,19 @@ export default function AiInsights({ quizAnswers, activities }: AiInsightsProps)
             placeholder="Ask your Solarpunk Sage anything..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            className="w-full bg-white border-2 border-brand-border rounded-lg px-4 pr-12 py-3.5 text-xs font-sans font-bold outline-none focus:border-emerald-500 text-slate-800 placeholder:text-slate-400"
+            className="w-full neumorph-inset rounded-xl px-4 pr-12 py-3.5 text-xs font-sans font-bold outline-none focus:ring-1 focus:ring-emerald-400/50 text-slate-800 placeholder:text-slate-400 border-none"
           />
           <button
             type="submit"
             id="advisor-chat-send-btn"
             disabled={!inputText.trim() || loading}
-            className="absolute right-2 bg-emerald-500 text-white w-8 h-8 rounded border-2 border-slate-900 flex items-center justify-center hover:brightness-105 active:scale-95 transition-all cursor-pointer disabled:bg-slate-200 disabled:cursor-not-allowed select-none"
+            className="absolute right-2 bg-emerald-500 text-white w-8 h-8 rounded-lg border border-emerald-400 flex items-center justify-center hover:brightness-105 transition-all cursor-pointer disabled:bg-slate-200 disabled:cursor-not-allowed select-none"
           >
-            <Send className="w-3 h-3 text-white fill-current" />
+            <Send className="w-3.5 h-3.5 text-white fill-current" />
           </button>
         </form>
 
-        <p className="text-[10px] text-center text-slate-400 font-sans font-bold uppercase tracking-wider">
+        <p className="text-[9px] text-center text-slate-400 font-sans font-black uppercase tracking-wider">
           Planetary scrolls are verified safe for ecological research.
         </p>
       </div>

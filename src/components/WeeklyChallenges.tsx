@@ -2,6 +2,10 @@ import { Challenge } from '../types';
 import { CheckCircle, Award, Compass, Trophy } from 'lucide-react';
 import { sfx } from '../utils/audio';
 
+import activeCommuteImg from '../../assets/eco_commute.png';
+import meatfreeDietImg from '../../assets/eco_diet.png';
+import coldWashImg from '../../assets/eco_laundry.png';
+
 interface WeeklyChallengesProps {
   challenges: Challenge[];
   onAcceptChallenge: (id: string) => void;
@@ -25,6 +29,7 @@ export default function WeeklyChallenges({
       difficulty: 'Medium Challenge',
       xpBonus: 'Gives +20 XP Accepted / +85 XP Reward',
       badge: '🚲',
+      image: activeCommuteImg,
     },
     'ch-meatfree': {
       title: 'Skip Meat for 3 Days 🥗',
@@ -32,6 +37,7 @@ export default function WeeklyChallenges({
       difficulty: 'Expert Challenge',
       xpBonus: 'Gives +20 XP Accepted / +85 XP Reward',
       badge: '🍅',
+      image: meatfreeDietImg,
     },
     'ch-cold-wash': {
       title: 'Air Dry Washing Lines 👕',
@@ -39,6 +45,7 @@ export default function WeeklyChallenges({
       difficulty: 'Light Challenge',
       xpBonus: 'Gives +20 XP Accepted / +85 XP Reward',
       badge: '💨',
+      image: coldWashImg,
     },
   };
 
@@ -69,12 +76,13 @@ export default function WeeklyChallenges({
       {/* Challenges cards grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {challenges.map((ch) => {
-          const detail = challengeDetails[ch.id as keyof typeof challengeDetails] || {
+          const detail = (challengeDetails[ch.id as keyof typeof challengeDetails] as any) || {
             title: ch.title,
             savings: `Saves ${ch.co2Savings} kg CO₂`,
             difficulty: 'Guild Quest',
             xpBonus: 'Earn level XP reward',
             badge: '🏆',
+            image: undefined,
           };
 
           return (
@@ -91,10 +99,20 @@ export default function WeeklyChallenges({
             >
               <div className="space-y-4">
                 {/* Solarpunk Graphic badge */}
-                <div className={`aspect-video w-full rounded-xl border flex flex-col items-center justify-center relative overflow-hidden ${ch.isCompleted ? 'bg-emerald-600/50 border-emerald-400' : 'bg-white/40 border-white/50 shadow-inner'}`}>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.08)_0,transparent_100%)]" />
-                  <span className={`text-5xl block select-none ${ch.isCompleted ? 'grayscale opacity-75' : 'animate-float'}`}>{detail.badge}</span>
-                  <span className={`text-[9px] font-display font-black uppercase tracking-wider mt-2.5 px-2.5 py-0.5 rounded-full border ${ch.isCompleted ? 'bg-emerald-700/80 text-emerald-100 border-emerald-600' : 'bg-white/90 text-slate-600 border-slate-200 shadow-sm'}`}>
+                <div className="aspect-video w-full rounded-xl border relative overflow-hidden bg-white/40 border-white/50 shadow-inner">
+                  {detail.image ? (
+                    <img 
+                      src={detail.image} 
+                      alt={detail.title} 
+                      className={`w-full h-full object-cover transition-all duration-500 ${ch.isCompleted ? 'grayscale opacity-60' : 'hover:scale-105'}`}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.08)_0,transparent_100%)]" />
+                      <span className={`text-5xl block select-none ${ch.isCompleted ? 'grayscale opacity-75' : 'animate-float'}`}>{detail.badge}</span>
+                    </div>
+                  )}
+                  <span className={`absolute top-2 left-2 text-[9px] font-display font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${ch.isCompleted ? 'bg-emerald-700/80 text-emerald-100 border-emerald-600' : 'bg-white/90 text-slate-600 border-slate-200 shadow-sm'}`}>
                     {detail.difficulty}
                   </span>
                 </div>

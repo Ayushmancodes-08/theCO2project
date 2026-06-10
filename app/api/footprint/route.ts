@@ -6,6 +6,8 @@ import { computeCategoryBreakdown, computeCarbonScore } from '@/lib/utils/emissi
 import { successResponse, errorResponse, getErrorMessage } from '@/lib/utils/api';
 import type { ActivityCategory } from '@/types';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(_req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

@@ -21,7 +21,7 @@ interface ChallengeDetail {
   difficulty: string;
   xpBonus:    string;
   badge:      string;
-  image?:     string;
+  image?:     any;
 }
 
 interface WeeklyChallengesProps {
@@ -188,7 +188,7 @@ export default function WeeklyChallenges({
                   <div className="aspect-video w-full rounded-xl border relative overflow-hidden bg-white/40 border-white/50 shadow-inner">
                     {detail.image ? (
                       <img
-                        src={detail.image}
+                        src={typeof detail.image === 'object' ? detail.image.src : detail.image}
                         alt={`Visual for challenge: ${detail.title}`}
                         loading="lazy"
                         decoding="async"

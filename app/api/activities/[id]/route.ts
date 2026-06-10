@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { successResponse, errorResponse, getErrorMessage } from '@/lib/utils/api';
 
+export const dynamic = 'force-dynamic';
+
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }

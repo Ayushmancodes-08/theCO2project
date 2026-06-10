@@ -43,11 +43,13 @@
     "lib/**/*.ts",
     "hooks/**/*.ts",
     "types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/vite-env.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "src",
     "dist",
     "e2e"
   ]

@@ -6,6 +6,8 @@ import { createActivitySchema, activityQuerySchema } from '@/lib/validations/act
 import { calculateCO2 } from '@/lib/utils/emissionCalculator';
 import { successResponse, errorResponse, getErrorMessage } from '@/lib/utils/api';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

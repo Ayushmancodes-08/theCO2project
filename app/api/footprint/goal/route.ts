@@ -9,6 +9,8 @@ const updateGoalSchema = z.object({
   goalKg: z.number().positive().max(2000),
 });
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

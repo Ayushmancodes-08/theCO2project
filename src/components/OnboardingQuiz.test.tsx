@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import OnboardingQuiz from './OnboardingQuiz';
+import { render, screen, fireEvent } from '@testing-library/react';
+import OnboardingQuiz from './OnboardingQuiz.tsx';
 import '@testing-library/jest-dom';
 
 vi.mock('../utils/audio', () => ({
   sfx: {
-    playLogSfx:     vi.fn(),
+    playLogSfx: vi.fn(),
     playLevelUpSfx: vi.fn(),
-    playDeleteSfx:  vi.fn(),
+    playDeleteSfx: vi.fn(),
   },
 }));
 
@@ -200,11 +200,11 @@ describe('OnboardingQuiz', () => {
       expect(handleComplete).toHaveBeenCalledOnce();
       expect(handleComplete).toHaveBeenCalledWith(
         expect.objectContaining({
-          transportMode:   'transit',
-          dietType:        'vegan',
-          homeEnergy:      'renewable',
+          transportMode: 'transit',
+          dietType: 'vegan',
+          homeEnergy: 'renewable',
           flightFrequency: 'low',
-          purchaseHabit:   'low',
+          purchaseHabit: 'low',
         })
       );
     });
